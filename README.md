@@ -11,12 +11,21 @@ rendered as vector React components so zoom-ins / push-ins stay crisp.
 | `PermuteBrandFilm` | Tables | 15s | richer (Option 2 style) |
 | `PermuteReportsOption1` | Reports | 12s | restrained (matches Tables Option 1) |
 | `PermuteReportsOption2` | Reports | 12s | richer (matches Tables Option 2) |
+| `PermuteDashboardsOption1` | Dashboards | 12s | restrained (matches Tables Option 1) |
+| `PermuteDashboardsOption2` | Dashboards | 12s | richer (matches Tables Option 2) |
 
-The two Reports options share one component (`reports/ReportsFilm.tsx`); a single
-`rich` flag is the only difference — Option 2 adds the same motion-design layer
-as Tables Option 2 (cross-cut connector/ring transitions, confirmation pulses,
-connector trails, floating chips, light sweeps). Reports beats: Reports running →
-Weekly schedule → Pipeline alerts → Packaged & sent.
+Each section's two options share one component driven by a single `rich` flag —
+Option 2 adds the same motion-design layer as Tables Option 2 (cross-cut
+connector/ring transitions, confirmation pulses, connector trails, floating
+chips, light sweeps).
+
+- **Reports** (`reports/ReportsFilm.tsx`): Reports running → Weekly schedule →
+  Pipeline alerts → Packaged & sent.
+- **Dashboards** (`dashboards/DashboardsFilm.tsx`): built **around the real
+  Permute demo footage** in `public/dash/` (Business Overview, Add Connector,
+  Cash Runway Planner) embedded via `OffthreadVideo` and enhanced with on-screen
+  text, highlights, and motion. Beats: Dashboards → Ask / theme → Get ideas
+  (bulb) → Permute builds the full system → No code needed.
 
 ## The Tables sequence
 
