@@ -5,6 +5,7 @@ import { AppWindow } from "../components/Stage";
 import { Caption } from "../components/Caption";
 import { Sphere } from "../components/Sphere";
 import { CheckCircle, DashRing } from "../components/Icons";
+import { ConfirmRing, SoftRing } from "../components/Motion";
 import { easeOut, easeInOut, reveal } from "../anim";
 
 const STEPS = [
@@ -112,7 +113,10 @@ export const Beat3Thinking: React.FC = () => {
                   marginTop: 30,
                 }}
               >
-                <Sphere size={30} />
+                <div style={{ position: "relative", display: "flex" }}>
+                  <SoftRing size={52} opacity={0.16} />
+                  <Sphere size={30} />
+                </div>
                 <span
                   style={{ fontSize: 22, fontWeight: 700, color: colors.ink }}
                 >
@@ -314,6 +318,23 @@ const MatchPanel: React.FC<{ frame: number }> = ({ frame }) => {
           );
         })}
       </svg>
+
+      {/* matched-field confirmation pulses at each connector midpoint */}
+      {PAIRS.map((p, i) => {
+        const pulse = interpolate(frame, [p.at + 12, p.at + 34], [0, 1], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+        });
+        const midX = (leftX + CARD_W + rightX) / 2;
+        return (
+          <div
+            key={`pulse-${i}`}
+            style={{ position: "absolute", left: midX, top: rowY(i) }}
+          >
+            <ConfirmRing progress={pulse} color={colors.green} size={40} />
+          </div>
+        );
+      })}
 
       {/* CRM card */}
       <RecordCard

@@ -4,6 +4,7 @@ import { colors, radii, shadows } from "../theme";
 import { AppWindow } from "../components/Stage";
 import { Caption } from "../components/Caption";
 import { CheckCircle, ConnectorGlyph, SearchIcon } from "../components/Icons";
+import { ConfirmRing, LightSweep } from "../components/Motion";
 import { easeOut, easeInOut, reveal } from "../anim";
 
 const PROMPT = `Create a contract-to-cash lifecycle table by reconciling CRM opportunity data with bank transfer / payment data.
@@ -119,6 +120,8 @@ export const Beat1Describe: React.FC = () => {
                   {PROMPT}
                 </div>
                 <Caret visible={promptWipe < 1} wipe={promptWipe} />
+                {/* light sweep once the prompt has resolved */}
+                <LightSweep progress={reveal(frame, 48, 18)} />
               </div>
 
               {/* Step 2 — Connect sources */}
@@ -287,6 +290,10 @@ const SourceRow: React.FC<{
     extrapolateRight: "clamp",
     easing: easeOut,
   });
+  const pulse = interpolate(frame, [selectAt + 2, selectAt + 22], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+  });
   return (
     <div
       style={{
@@ -300,6 +307,7 @@ const SourceRow: React.FC<{
     >
       <div
         style={{
+          position: "relative",
           width: 20,
           height: 20,
           borderRadius: 5,
@@ -313,6 +321,7 @@ const SourceRow: React.FC<{
         {sel > 0.5 && (
           <span style={{ color: "#fff", fontSize: 13, lineHeight: 1 }}>✓</span>
         )}
+        <ConfirmRing progress={pulse} color={colors.blue} size={34} />
       </div>
       <ConnectorGlyph tint={src.tint} />
       <div style={{ display: "flex", flexDirection: "column" }}>

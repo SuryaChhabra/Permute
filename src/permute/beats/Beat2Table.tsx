@@ -3,6 +3,8 @@ import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
 import { colors, radii, shadows } from "../theme";
 import { AppWindow } from "../components/Stage";
 import { Caption } from "../components/Caption";
+import { LightSweep } from "../components/Motion";
+import { CheckFilled } from "../components/Icons";
 import { easeOut, easeInOut } from "../anim";
 
 type Row = {
@@ -84,7 +86,9 @@ export const Beat2Table: React.FC = () => {
     >
       <div style={{ transform: `scale(${scale}) translateY(${ty}px)` }}>
         <AppWindow width={1180} height={620} workspace="Contract-to-Cash">
-          <div style={{ padding: "22px 26px", height: "100%" }}>
+          <div
+            style={{ padding: "22px 26px", height: "100%", position: "relative" }}
+          >
             <div
               style={{
                 fontSize: 14,
@@ -198,7 +202,15 @@ export const Beat2Table: React.FC = () => {
                   pointerEvents: "none",
                 }}
               />
+              {/* full-table light sweep as the data settles */}
+              <LightSweep progress={interpolate(frame, [40, 58], [0, 1], {
+                extrapolateLeft: "clamp",
+                extrapolateRight: "clamp",
+              })} />
             </div>
+
+            {/* on exit, a few clean rows lift out as cards */}
+            <LiftCards frame={frame} />
           </div>
         </AppWindow>
       </div>
@@ -305,6 +317,80 @@ const StatusPill: React.FC<{ text: string }> = ({ text }) => {
     >
       {text}
     </span>
+  );
+};
+
+// Three representative rows lift out of the table as clean cards near the cut,
+// reinforcing "messy table -> structured records" without cluttering the frame.
+const LIFT = [
+  { customer: "Northwind LLC", status: "Paid — Reconciled", health: "Green" as const },
+  { customer: "Acme Inc", status: "Awaiting Signature", health: "Yellow" as const },
+  { customer: "Globex Corp", status: "Paid — Reconciled", health: "Green" as const },
+];
+
+const LiftCards: React.FC<{ frame: number }> = ({ frame }) => {
+  const appear = interpolate(frame, [56, 68], [0, 1], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: easeOut,
+  });
+  if (appear <= 0) return null;
+  return (
+    <div
+      style={{
+        position: "absolute",
+        left: 0,
+        right: 0,
+        top: 150,
+        display: "flex",
+        justifyContent: "center",
+        gap: 26,
+        pointerEvents: "none",
+      }}
+    >
+      {LIFT.map((r, i) => {
+        const a = interpolate(frame, [56 + i * 5, 70 + i * 5], [0, 1], {
+          extrapolateLeft: "clamp",
+          extrapolateRight: "clamp",
+          easing: easeOut,
+        });
+        const paid = r.status.startsWith("Paid");
+        return (
+          <div
+            key={r.customer}
+            style={{
+              width: 248,
+              background: "#fff",
+              borderRadius: radii.card,
+              border: `1px solid ${colors.border}`,
+              boxShadow: shadows.card,
+              padding: "16px 18px",
+              opacity: a,
+              transform: `translateY(${(1 - a) * 40}px) scale(${0.94 + a * 0.06})`,
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <span style={{ fontSize: 16, fontWeight: 700, color: colors.ink }}>
+                {r.customer}
+              </span>
+              {paid && <CheckFilled size={20} />}
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <StatusPill text={r.status} />
+            </div>
+            <div style={{ marginTop: 12 }}>
+              <HealthDot v={r.health} />
+            </div>
+          </div>
+        );
+      })}
+    </div>
   );
 };
 

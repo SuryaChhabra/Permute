@@ -4,6 +4,7 @@ import { colors, radii, shadows } from "../theme";
 import { AppWindow } from "../components/Stage";
 import { Caption } from "../components/Caption";
 import { CheckFilled } from "../components/Icons";
+import { ConfirmRing, TravelNode } from "../components/Motion";
 import { easeOut, easeInOut } from "../anim";
 
 const VW = 1280;
@@ -194,6 +195,26 @@ export const Beat4Lifecycle: React.FC = () => {
                 })}
               </svg>
 
+              {/* glow node carrying motion along each flow arrow */}
+              {STAGES.slice(0, -1).map((_, i) => {
+                const drawAt = STAGES[i + 1].appearAt - 6;
+                const prog = interpolate(frame, [drawAt, drawAt + 16], [0, 1], {
+                  extrapolateLeft: "clamp",
+                  extrapolateRight: "clamp",
+                });
+                return (
+                  <TravelNode
+                    key={`tn-${i}`}
+                    x1={cardX(i) + CARD_W}
+                    x2={cardX(i + 1)}
+                    y={RAIL_Y}
+                    progress={prog}
+                    color={colors.blueSoft}
+                    size={11}
+                  />
+                );
+              })}
+
               {STAGES.map((s, i) => (
                 <StageCard
                   key={i}
@@ -202,6 +223,28 @@ export const Beat4Lifecycle: React.FC = () => {
                   reconcile={reconcileGlow}
                 />
               ))}
+
+              {/* confirmation ring as each record reconciles */}
+              {STAGES.map((_, i) => {
+                const pulse = interpolate(
+                  frame,
+                  [RECONCILE_AT + i * 4, RECONCILE_AT + i * 4 + 24],
+                  [0, 1],
+                  { extrapolateLeft: "clamp", extrapolateRight: "clamp" },
+                );
+                return (
+                  <div
+                    key={`rp-${i}`}
+                    style={{
+                      position: "absolute",
+                      left: cardX(i) + CARD_W / 2,
+                      top: RAIL_Y,
+                    }}
+                  >
+                    <ConfirmRing progress={pulse} color={colors.green} size={120} thickness={2.5} />
+                  </div>
+                );
+              })}
 
               {/* matched-amount link between invoice & payment */}
               <AmountLink frame={frame} />
