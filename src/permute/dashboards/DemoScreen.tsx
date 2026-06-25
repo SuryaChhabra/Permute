@@ -19,6 +19,7 @@ export const DemoScreen: React.FC<{
   innerX?: number; // -1..1 horizontal bias
   innerY?: number; // -1..1 vertical bias
   opacity?: number;
+  playbackRate?: number;
   children?: React.ReactNode; // overlays in frame space
 }> = ({
   src,
@@ -32,6 +33,7 @@ export const DemoScreen: React.FC<{
   innerX = 0,
   innerY = 0,
   opacity = 1,
+  playbackRate = 1,
   children,
 }) => {
   return (
@@ -63,6 +65,7 @@ export const DemoScreen: React.FC<{
         <OffthreadVideo
           src={staticFile(src)}
           startFrom={startFrom}
+          playbackRate={playbackRate}
           muted
           style={{ width: "100%", height: "100%", objectFit: "cover" }}
         />

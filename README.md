@@ -20,8 +20,10 @@ Option 2 adds the same motion-design layer as Tables Option 2 (cross-cut
 connector/ring transitions, confirmation pulses, connector trails, floating
 chips, light sweeps).
 
-- **Reports** (`reports/ReportsFilm.tsx`): Reports running → Weekly schedule →
-  Pipeline alerts → Packaged & sent.
+- **Reports** (`reports/ReportsFilm.tsx`): built around the real Reports footage
+  in `public/reports/` (run history, scheduling, report specs, Excel export).
+  Beats: Run history (reports running) → Weekly schedule → Pipeline alerts (real
+  Alerts tab) → Excel export delivered & sent.
 - **Dashboards** (`dashboards/DashboardsFilm.tsx`): built **around the real
   Permute demo footage** in `public/dash/` (Business Overview, Pick-a-theme
   modal, Cash Runway Planner) embedded via `OffthreadVideo` and enhanced with

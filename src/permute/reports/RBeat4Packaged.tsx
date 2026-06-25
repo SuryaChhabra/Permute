@@ -1,43 +1,16 @@
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
-import { colors, radii, shadows } from "../theme";
-import { AppWindow } from "../components/Stage";
+import { colors, radii, shadows, fontFamily } from "../theme";
 import { Caption } from "../components/Caption";
 import { CheckFilled } from "../components/Icons";
 import { LightSweep, ConfirmRing } from "../components/Motion";
-import { Badge, SectionLabel } from "./parts";
+import { DemoScreen } from "../dashboards/DemoScreen";
 import { easeOut, easeInOut, reveal } from "../anim";
-
-const CARDS = [
-  {
-    title: "Cash flow",
-    value: "$271,253",
-    sub: "collected · $332,918 outstanding",
-    accent: colors.green,
-  },
-  {
-    title: "Pipeline movement",
-    value: "+$763,572",
-    sub: "closed · 12 deals advanced",
-    accent: colors.blue,
-  },
-  {
-    title: "Sales activity",
-    value: "48 updates",
-    sub: "across 9 owners this week",
-    accent: colors.orange,
-  },
-];
 
 export const RBeat4Packaged: React.FC<{ rich: boolean }> = ({ rich }) => {
   const frame = useCurrentFrame();
 
-  // Settle from a slight push-in to a composed full view (gentle pull-back).
-  const scale = interpolate(frame, [0, 90], [1.05, 1.0], {
-    extrapolateRight: "clamp",
-    easing: easeInOut,
-  });
-  const enter = interpolate(frame, [0, 14], [0, 1], {
+  const enter = interpolate(frame, [0, 16], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: easeOut,
@@ -48,177 +21,81 @@ export const RBeat4Packaged: React.FC<{ rich: boolean }> = ({ rich }) => {
     easing: easeInOut,
   });
 
-  const sent = reveal(frame, 72, 14);
+  // gentle settle (footage already scrolls, so keep camera quiet)
+  const scale = interpolate(frame, [0, 120], [1.03, 1.0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: easeInOut,
+  });
+
+  const sent = reveal(frame, 78, 14);
   const sentPulse = rich
-    ? interpolate(frame, [74, 98], [0, 1], {
+    ? interpolate(frame, [80, 104], [0, 1], {
         extrapolateLeft: "clamp",
         extrapolateRight: "clamp",
       })
     : 0;
 
   return (
-    <AbsoluteFill
-      style={{
-        alignItems: "center",
-        justifyContent: "center",
-        opacity: Math.min(enter, exit),
-      }}
-    >
+    <AbsoluteFill style={{ opacity: Math.min(enter, exit) }}>
+      <DemoScreen
+        src="reports/excel.mp4"
+        startFrom={0}
+        playbackRate={0.45}
+        width={1500}
+        height={736}
+        scale={scale}
+        ty={(1 - enter) * 16}
+      >
+        {rich && (
+          <LightSweep
+            progress={reveal(frame, 86, 24)}
+            color="rgba(122,162,255,0.16)"
+            width={28}
+          />
+        )}
+      </DemoScreen>
+
+      {/* delivered / sent confirmation above the sheet */}
       <div
         style={{
-          transform: `scale(${scale}) translateY(${(1 - enter) * 18}px)`,
+          position: "absolute",
+          left: "50%",
+          top: 116,
+          transform: `translateX(-50%) translateY(${(1 - sent) * 12}px)`,
+          opacity: sent,
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          background: "#fff",
+          border: `1px solid ${colors.green}33`,
+          boxShadow: shadows.card,
+          borderRadius: radii.pill,
+          padding: "10px 20px",
+          fontFamily,
         }}
       >
-        <AppWindow width={1240} height={700} workspace="Reports">
-          <div
-            style={{
-              padding: "28px 34px",
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              position: "relative",
-            }}
-          >
-            <div style={{ fontSize: 14, color: colors.inkMuted }}>
-              Reports <span style={{ opacity: 0.5 }}>/</span> Weekly Update
-            </div>
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                margin: "8px 0 6px",
-              }}
-            >
-              <div
-                style={{ fontSize: 26, fontWeight: 700, color: colors.ink }}
-              >
-                Weekly Contract-to-Cash
-              </div>
-              <div style={{ opacity: reveal(frame, 16, 10) }}>
-                <Badge text="Report ready" tone="green" />
-              </div>
-            </div>
-            <SectionLabel>Packaged sections</SectionLabel>
-
-            {/* three report cards assembling */}
-            <div style={{ display: "flex", gap: 20, marginTop: 18 }}>
-              {CARDS.map((c, i) => {
-                const a = reveal(frame, 10 + i * 8, 18);
-                return (
-                  <div
-                    key={c.title}
-                    style={{
-                      flex: "1 1 0",
-                      background: "#fff",
-                      borderRadius: radii.card,
-                      border: `1px solid ${colors.border}`,
-                      boxShadow: shadows.card,
-                      padding: "20px 22px",
-                      opacity: a,
-                      transform: `translateY(${(1 - a) * 30}px) scale(${0.96 + a * 0.04})`,
-                      minHeight: 188,
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <div
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 9,
-                        marginBottom: 16,
-                      }}
-                    >
-                      <span
-                        style={{
-                          width: 10,
-                          height: 10,
-                          borderRadius: 3,
-                          background: c.accent,
-                        }}
-                      />
-                      <span
-                        style={{
-                          fontSize: 15,
-                          fontWeight: 700,
-                          color: colors.ink,
-                        }}
-                      >
-                        {c.title}
-                      </span>
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 30,
-                        fontWeight: 700,
-                        color: colors.ink,
-                        letterSpacing: "-0.02em",
-                        fontVariantNumeric: "tabular-nums",
-                      }}
-                    >
-                      {c.value}
-                    </div>
-                    <div
-                      style={{
-                        fontSize: 13.5,
-                        color: colors.inkMuted,
-                        marginTop: 8,
-                        lineHeight: 1.5,
-                      }}
-                    >
-                      {c.sub}
-                    </div>
-                    <div style={{ marginTop: "auto", paddingTop: 14 }}>
-                      <Badge text="Included" tone="neutral" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* delivered state */}
-            <div
-              style={{
-                marginTop: "auto",
-                display: "flex",
-                alignItems: "center",
-                gap: 14,
-                padding: "16px 20px",
-                borderRadius: radii.card,
-                background: colors.greenTint,
-                border: `1px solid ${colors.green}33`,
-                opacity: sent,
-                transform: `translateY(${(1 - sent) * 16}px)`,
-                position: "relative",
-              }}
-            >
-              <div style={{ position: "relative", display: "flex" }}>
-                <CheckFilled size={26} />
-                {sentPulse > 0 && (
-                  <ConfirmRing progress={sentPulse} color={colors.green} size={56} />
-                )}
-              </div>
-              <span style={{ fontSize: 17, fontWeight: 700, color: colors.ink }}>
-                Delivered to team
-              </span>
-              <span style={{ fontSize: 15, color: colors.inkSoft }}>
-                Monday, 9:00 AM · recurring weekly
-              </span>
-              <span style={{ marginLeft: "auto" }}>
-                <Badge text="Sent" tone="green" />
-              </span>
-            </div>
-
-            {rich && (
-              <LightSweep
-                progress={reveal(frame, 80, 22)}
-                color="rgba(122,162,255,0.16)"
-                width={30}
-              />
-            )}
-          </div>
-        </AppWindow>
+        <div style={{ position: "relative", display: "flex" }}>
+          <CheckFilled size={22} />
+          {sentPulse > 0 && (
+            <ConfirmRing progress={sentPulse} color={colors.green} size={48} />
+          )}
+        </div>
+        <span style={{ fontSize: 16, fontWeight: 700, color: colors.ink }}>
+          Report delivered to team
+        </span>
+        <span
+          style={{
+            fontSize: 13.5,
+            fontWeight: 700,
+            color: colors.green,
+            background: colors.greenTint,
+            borderRadius: radii.pill,
+            padding: "3px 11px",
+          }}
+        >
+          Sent
+        </span>
       </div>
 
       <Caption
