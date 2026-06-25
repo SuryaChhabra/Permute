@@ -1,54 +1,50 @@
-# Remotion video
+# Permute — Brand Film
 
-<p align="center">
-  <a href="https://github.com/remotion-dev/logo">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-dark.apng">
-      <img alt="Animated Remotion Logo" src="https://github.com/remotion-dev/logo/raw/main/animated-logo-banner-light.gif">
-    </picture>
-  </a>
-</p>
+A polished 15-second B2B SaaS brand-film sequence for **Permute**, built with
+[Remotion](https://remotion.dev). Everything (UI, tables, motion graphics) is
+rendered as vector React components so zoom-ins / push-ins stay crisp.
 
-Welcome to your Remotion project!
+## The sequence
 
-## Commands
+| Time        | On-screen text                       | Beat                                                            |
+| ----------- | ------------------------------------ | --------------------------------------------------------------- |
+| 0.0–3.0s    | Describe the logic. Select the sources. | New Data Table flow — prompt + source selection, slow push-in   |
+| 3.0–5.5s    | Get one clean view.                  | Unified spreadsheet resolving via a cleaning sweep              |
+| 5.5–8.5s    | CRM meets payments.                  | AI-thinking panel + matched CRM ↔ payment records              |
+| 8.5–15.0s   | Contract-to-cash, reconciled.        | Lifecycle (Opportunity → Contract → Invoice → Payment → Reconciled), tracking camera that zooms out to the full reconciled view |
 
-**Install Dependencies**
+- 1920×1080, 30fps, 450 frames
+- Palette: white / neutral surfaces, dark-slate text, vivid product blue
+- Inter is self-hosted (`@fontsource/inter`) so renders run fully offline
 
-```console
-npm i
+## Develop
+
+```bash
+npm install
+npm run dev      # Remotion Studio — composition id: PermuteBrandFilm
 ```
 
-**Start Preview**
+## Render
 
-```console
-npm run dev
+```bash
+npx remotion render PermuteBrandFilm out/permute.mp4
 ```
 
-**Render video**
+In sandboxed environments where Remotion can't download its own Chrome, point
+it at a pre-installed Chromium **headless_shell** binary:
 
-```console
-npx remotion render
+```bash
+npx remotion render PermuteBrandFilm out/permute.mp4 \
+  --browser-executable=/opt/pw-browsers/chromium_headless_shell-1194/chrome-linux/headless_shell
 ```
 
-**Upgrade Remotion**
+## Structure
 
-```console
-npx remotion upgrade
 ```
-
-## Docs
-
-Get started with Remotion by reading the [fundamentals page](https://www.remotion.dev/docs/the-fundamentals).
-
-## Help
-
-We provide help on our [Discord server](https://discord.gg/6VzzNDwUwV).
-
-## Issues
-
-Found an issue with Remotion? [File an issue here](https://github.com/remotion-dev/remotion/issues/new).
-
-## License
-
-Note that for some entities a company license is needed. [Read the terms here](https://github.com/remotion-dev/remotion/blob/main/LICENSE.md).
+src/permute/
+  theme.ts            colors, fonts, radii, shadows
+  anim.ts             shared easing / reveal helpers
+  BrandFilm.tsx       composes the four beats over a shared stage
+  components/         Stage (bg + app chrome), Caption, Sphere, Icons
+  beats/              Beat1Describe, Beat2Table, Beat3Thinking, Beat4Lifecycle
+```
