@@ -5,24 +5,22 @@ export type TileData = {
   id: number;
   glyph: GlyphType;
   color: string;
-  // start (messy pile)
+  solid: boolean; // colored face w/ white glyph (accent tile)
+  // start (dense pile)
   sx: number;
   sy: number;
   srot: number;
-  sscale: number;
-  sdepth: number; // 0 = far/back, 1 = near/front
-  // resolution
-  kept: boolean;
+  ssize: number;
+  zback: number; // 0 = back, 1 = front (render + shadow order)
+  // resolved grid slot (1:1 mapping — every tile keeps its place)
   gx: number;
   gy: number;
   gsize: number;
-  delay: number; // stagger frames
+  delay: number;
 };
 
 const W = 1920;
-const H = 1080;
 
-// deterministic PRNG so the layout is identical every frame / render
 function mulberry32(seed: number) {
   let a = seed;
   return () => {
@@ -41,88 +39,88 @@ const PALETTE = [
   colors.green,
   colors.orange,
   colors.idea,
-  "#3f7fb3", // muted teal-blue
+  "#3f7fb3",
   colors.inkSoft,
 ];
 
-const N = 88;
-const KEPT = 24;
-const GRID_COLS = 6;
-const GRID_ROWS = 4;
+// pyramid pile rows (bottom -> top); sums to 60
+const PILE_ROWS = [13, 12, 11, 10, 8, 6];
+const N = PILE_ROWS.reduce((a, b) => a + b, 0);
 
-// clean grid geometry
-const G_SIZE = 104;
-const G_GAP = 46;
-const GRID_W = GRID_COLS * G_SIZE + (GRID_COLS - 1) * G_GAP;
-const GRID_H = GRID_ROWS * G_SIZE + (GRID_ROWS - 1) * G_GAP;
+// clean resolved grid
+const COLS = 10;
+const ROWS = 6;
+const G_SIZE = 92;
+const G_GAP = 26;
+const GRID_W = COLS * G_SIZE + (COLS - 1) * G_GAP;
+const GRID_H = ROWS * G_SIZE + (ROWS - 1) * G_GAP;
 const GRID_X = (W - GRID_W) / 2;
-const GRID_Y = 470 - GRID_H / 2;
-
-function pileTopY(x: number) {
-  const n = (x - W / 2) / (W / 2); // -1..1
-  return 96 + 560 * n * n; // parabola: low (peak) at center
-}
+const GRID_Y = 540 - GRID_H / 2;
 
 function build(): TileData[] {
-  const rnd = mulberry32(20260625);
-  const tiles: Omit<TileData, "kept" | "gx" | "gy" | "gsize" | "delay">[] = [];
+  const rnd = mulberry32(20260626);
 
-  for (let i = 0; i < N; i++) {
-    const x = 40 + rnd() * (W - 80);
-    const top = pileTopY(x);
-    const r = Math.pow(rnd(), 0.72);
-    const y = top + r * (H - 70 - top);
-    const depth = 0.25 + (y / H) * 0.75 + (rnd() - 0.5) * 0.15; // lower = nearer
-    tiles.push({
-      id: i,
-      glyph: GLYPH_TYPES[Math.floor(rnd() * GLYPH_TYPES.length)] as GlyphType,
-      color: PALETTE[Math.floor(rnd() * PALETTE.length)],
-      sx: x,
-      sy: y,
-      srot: (rnd() - 0.5) * 26,
-      sscale: 0.7 + depth * 0.55,
-      sdepth: Math.max(0, Math.min(1, depth)),
-    });
+  // 1) dense pyramidal pile
+  type Start = {
+    glyph: GlyphType;
+    color: string;
+    solid: boolean;
+    sx: number;
+    sy: number;
+    srot: number;
+    ssize: number;
+    zback: number;
+  };
+  const starts: Start[] = [];
+  const rowCount = PILE_ROWS.length;
+  for (let r = 0; r < rowCount; r++) {
+    const count = PILE_ROWS[r];
+    const rowWidth = 1540 - (r / (rowCount - 1)) * 1140; // wide at base, narrow on top
+    const baseY = 902 - r * 120; // stack upward, heavy overlap
+    for (let i = 0; i < count; i++) {
+      const t = count === 1 ? 0.5 : i / (count - 1);
+      const x = 960 - rowWidth / 2 + t * rowWidth + (rnd() - 0.5) * 46;
+      const y = baseY + (rnd() - 0.5) * 40;
+      starts.push({
+        glyph: GLYPH_TYPES[Math.floor(rnd() * GLYPH_TYPES.length)],
+        color: PALETTE[Math.floor(rnd() * PALETTE.length)],
+        solid: rnd() < 0.16,
+        sx: x,
+        sy: y,
+        srot: (rnd() - 0.5) * 26,
+        ssize: 104 + (rnd() - 0.5) * 18,
+        zback: r / rowCount + (rnd() - 0.5) * 0.08,
+      });
+    }
   }
 
-  // choose kept tiles spread across the pile (every ~Nth by index)
-  const keptIds = new Set<number>();
-  const step = N / KEPT;
-  for (let k = 0; k < KEPT; k++) keptIds.add(Math.floor(k * step));
-
-  // assign grid cells to kept tiles, ordered by start x so they don't cross
-  const keptList = tiles
-    .filter((t) => keptIds.has(t.id))
-    .sort((a, b) => a.sx - b.sx);
-
-  const gridCellOf: Record<number, { gx: number; gy: number }> = {};
-  // fill grid column-major-ish by sorting kept by x, then placing row by row
-  const sortedForGrid = [...keptList].sort(
-    (a, b) => a.sy * 0.45 + a.sx * 0.55 - (b.sy * 0.45 + b.sx * 0.55),
-  );
-  sortedForGrid.forEach((t, idx) => {
-    const col = idx % GRID_COLS;
-    const row = Math.floor(idx / GRID_COLS);
-    gridCellOf[t.id] = {
-      gx: GRID_X + col * (G_SIZE + G_GAP),
-      gy: GRID_Y + row * (G_SIZE + G_GAP),
-    };
-  });
-
-  return tiles.map((t) => {
-    const kept = keptIds.has(t.id);
-    const cell = gridCellOf[t.id];
-    return {
-      ...t,
-      kept,
-      gx: cell ? cell.gx : t.sx,
-      gy: cell ? cell.gy : t.sy,
-      gsize: G_SIZE,
-      // left tiles resolve first; non-kept slightly later as they recede
-      delay: Math.round((t.sx / W) * 26 + (kept ? 0 : 8) + (1 - t.sdepth) * 6),
-    };
-  });
+  // 2) map each pile tile to a grid cell, left pile -> left columns, so the
+  //    pile "combs" directly into the grid without crossing
+  const byX = [...starts].sort((a, b) => a.sx - b.sx);
+  const tiles: TileData[] = [];
+  for (let col = 0; col < COLS; col++) {
+    const colTiles = byX.slice(col * ROWS, col * ROWS + ROWS).sort((a, b) => a.sy - b.sy);
+    colTiles.forEach((st, row) => {
+      tiles.push({
+        id: tiles.length,
+        glyph: st.glyph,
+        color: st.color,
+        solid: st.solid,
+        sx: st.sx,
+        sy: st.sy,
+        srot: st.srot,
+        ssize: st.ssize,
+        zback: st.zback,
+        gx: GRID_X + col * (G_SIZE + G_GAP) + G_SIZE / 2,
+        gy: GRID_Y + row * (G_SIZE + G_GAP) + G_SIZE / 2,
+        gsize: G_SIZE,
+        delay: col * 6 + row, // left-to-right comb wave
+      });
+    });
+  }
+  return tiles.sort((a, b) => a.id - b.id);
 }
 
 export const TILES: TileData[] = build();
-export const GRID_GEO = { GRID_X, GRID_Y, GRID_W, GRID_H, G_SIZE };
+export const TILE_COUNT = N;
+export const GRID_GEO = { GRID_X, GRID_Y, GRID_W, GRID_H };

@@ -18,11 +18,18 @@ export type GlyphType =
   | "card"
   | "table"
   | "check"
-  | "cloud";
+  | "cloud"
+  | "chat"
+  | "list"
+  | "briefcase"
+  | "network"
+  | "play"
+  | "search";
 
 export const GLYPH_TYPES: GlyphType[] = [
   "database", "mail", "pie", "bars", "line", "people", "person", "clock",
   "doc", "lock", "link", "bell", "card", "table", "check", "cloud",
+  "chat", "list", "briefcase", "network", "play", "search",
 ];
 
 export const Glyph: React.FC<{ type: GlyphType; c: string; size: number }> = ({
@@ -128,6 +135,47 @@ export const Glyph: React.FC<{ type: GlyphType; c: string; size: number }> = ({
       )}
       {type === "cloud" && (
         <path d="M7.5 18h9a3.5 3.5 0 0 0 .3-7 5 5 0 0 0-9.6-1.3A3.6 3.6 0 0 0 7.5 18z" fill={c} />
+      )}
+      {type === "chat" && (
+        <>
+          <path d="M4.5 5.5h15a1.5 1.5 0 0 1 1.5 1.5v8a1.5 1.5 0 0 1-1.5 1.5H10l-4 3.2V16H4.5A1.5 1.5 0 0 1 3 14.5V7a1.5 1.5 0 0 1 1.5-1.5z" {...s} />
+          <path d="M7 10h10M7 13h6" {...s} />
+        </>
+      )}
+      {type === "list" && (
+        <>
+          <circle cx="5" cy="7" r="1.4" fill={c} />
+          <circle cx="5" cy="12" r="1.4" fill={c} />
+          <circle cx="5" cy="17" r="1.4" fill={c} />
+          <path d="M9 7h11M9 12h11M9 17h8" {...s} />
+        </>
+      )}
+      {type === "briefcase" && (
+        <>
+          <rect x="3.5" y="7.5" width="17" height="11" rx="2" fill={c} />
+          <path d="M9 7.5V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v1.5" stroke={c} strokeWidth="1.7" fill="none" strokeLinecap="round" />
+          <path d="M3.5 12.5h17" stroke="#fff" strokeWidth="1.5" />
+        </>
+      )}
+      {type === "network" && (
+        <>
+          <circle cx="6" cy="17" r="2.4" fill={c} />
+          <circle cx="18" cy="17" r="2.4" fill={c} />
+          <circle cx="12" cy="6" r="2.4" fill={c} />
+          <path d="M11 7.6L7 15M13 7.6L17 15M8.4 17h7.2" {...s} />
+        </>
+      )}
+      {type === "play" && (
+        <>
+          <circle cx="12" cy="12" r="8.5" fill={c} />
+          <path d="M10 8.5l5.5 3.5L10 15.5z" fill="#fff" />
+        </>
+      )}
+      {type === "search" && (
+        <>
+          <circle cx="10.5" cy="10.5" r="6" {...s} />
+          <path d="M15 15l4.5 4.5" {...s} strokeWidth="2" />
+        </>
       )}
     </svg>
   );

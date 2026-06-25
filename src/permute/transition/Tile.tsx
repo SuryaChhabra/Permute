@@ -4,10 +4,24 @@ import { TileData } from "./tiles";
 import { Glyph } from "./glyphs";
 import { easeInOut } from "../anim";
 
-const MOVE_BASE = 30;
-const MOVE_DUR = 50;
+const MOVE_BASE = 46;
+const MOVE_DUR = 82;
 
-export const Tile: React.FC<{ t: TileData }> = ({ t }) => {
+// cream (problem world) -> white (product world)
+function faceColor(p: number, solid: boolean, color: string) {
+  if (solid) return color;
+  // interpolate cream #efe3cd -> white #ffffff
+  const c0 = [0xef, 0xe3, 0xcd];
+  const c1 = [0xff, 0xff, 0xff];
+  const k = interpolate(p, [0, 1], [0, 1]);
+  const ch = c0.map((v, i) => Math.round(v + (c1[i] - v) * k));
+  return `rgb(${ch[0]}, ${ch[1]}, ${ch[2]})`;
+}
+
+export const Tile: React.FC<{ t: TileData; colorProgress: number }> = ({
+  t,
+  colorProgress,
+}) => {
   const frame = useCurrentFrame();
   const start = MOVE_BASE + t.delay;
   const p = interpolate(frame, [start, start + MOVE_DUR], [0, 1], {
@@ -16,42 +30,21 @@ export const Tile: React.FC<{ t: TileData }> = ({ t }) => {
     easing: easeInOut,
   });
 
-  // subtle pre-move tension (gentle float)
-  const breathe = p < 0.02 ? Math.sin(frame / 9 + t.id) * 2.2 : 0;
-  const startSize = 100 * t.sscale;
+  // subtle settling tension before the tile's move begins
+  const breathe = p < 0.02 ? Math.sin(frame / 10 + t.id) * 1.8 : 0;
 
-  let cx: number;
-  let cy: number;
-  let size: number;
-  let rot: number;
-  let opacity: number;
-
-  if (t.kept) {
-    cx = interpolate(p, [0, 1], [t.sx, t.gx + t.gsize / 2]);
-    cy = interpolate(p, [0, 1], [t.sy + breathe, t.gy + t.gsize / 2]);
-    size = interpolate(p, [0, 1], [startSize, t.gsize]);
-    rot = interpolate(p, [0, 1], [t.srot, 0]);
-    opacity = 1;
-  } else {
-    // recede: drift toward center & up, shrink and fade away (cleared)
-    const cxTarget = t.sx + (960 - t.sx) * 0.18;
-    const cyTarget = t.sy - 60;
-    cx = interpolate(p, [0, 1], [t.sx, cxTarget]);
-    cy = interpolate(p, [0, 1], [t.sy + breathe, cyTarget]);
-    size = interpolate(p, [0, 1], [startSize, startSize * 0.62]);
-    rot = interpolate(p, [0, 1], [t.srot, t.srot * 0.4]);
-    opacity = interpolate(p, [0.15, 0.85], [1, 0], {
-      extrapolateLeft: "clamp",
-      extrapolateRight: "clamp",
-    });
-  }
-
-  if (opacity <= 0) return null;
-
+  const cx = interpolate(p, [0, 1], [t.sx, t.gx]);
+  const cy = interpolate(p, [0, 1], [t.sy + breathe, t.gy]);
+  const size = interpolate(p, [0, 1], [t.ssize, t.gsize]);
+  const rot = interpolate(p, [0, 1], [t.srot, 0]);
   const radius = size * 0.22;
-  // nearer tiles cast a stronger shadow; flatten as they align
-  const shadowDepth = 0.18 + t.sdepth * 0.32;
-  const shadow = `0 ${10 + t.sdepth * 14}px ${22 + t.sdepth * 20}px -8px rgba(20,40,90,${shadowDepth * (1 - p * 0.4)})`;
+
+  // shadow: weighted in the pile, flattening as tiles align
+  const depthShadow = 0.16 + t.zback * 0.26;
+  const shadow = `0 ${9 + t.zback * 13}px ${20 + t.zback * 18}px -8px rgba(20,40,90,${depthShadow * (1 - p * 0.45)})`;
+
+  const face = faceColor(colorProgress, t.solid, t.color);
+  const glyphColor = t.solid ? "#ffffff" : t.color;
 
   return (
     <div
@@ -62,17 +55,20 @@ export const Tile: React.FC<{ t: TileData }> = ({ t }) => {
         width: size,
         height: size,
         borderRadius: radius,
-        background: "linear-gradient(155deg, #ffffff 0%, #eef1f7 100%)",
-        border: "1px solid rgba(255,255,255,0.9)",
+        background: t.solid
+          ? `linear-gradient(155deg, ${face} 0%, ${face} 100%)`
+          : `linear-gradient(155deg, #ffffff 0%, ${face} 100%)`,
+        border: t.solid
+          ? "1px solid rgba(255,255,255,0.35)"
+          : "1px solid rgba(255,255,255,0.85)",
         boxShadow: shadow,
         transform: `rotate(${rot}deg)`,
-        opacity,
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
       }}
     >
-      <Glyph type={t.glyph} c={t.color} size={size * 0.5} />
+      <Glyph type={t.glyph} c={glyphColor} size={size * 0.5} />
     </div>
   );
 };

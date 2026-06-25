@@ -9,41 +9,45 @@ import { easeOut, easeInOut } from "../anim";
 import { TILES } from "./tiles";
 import { Tile } from "./Tile";
 
-export const TRANSITION_DURATION = 150; // 5s @ 30fps
+export const TRANSITION_DURATION = 330; // 11s @ 30fps
 
-// back-to-front render order so the pile layers correctly
-const ORDERED = [...TILES].sort((a, b) => a.sdepth - b.sdepth);
+// back-to-front so the pile layers correctly
+const ORDERED = [...TILES].sort((a, b) => a.zback - b.zback);
 
 export const TransitionFilm: React.FC = () => {
   const frame = useCurrentFrame();
 
-  // camera: gentle push-in, then settle back as the window reveals
   const camScale =
-    interpolate(frame, [0, 115], [1.0, 1.04], {
+    interpolate(frame, [0, 200], [1.0, 1.035], {
       extrapolateRight: "clamp",
       easing: easeOut,
     }) -
-    interpolate(frame, [124, 150], [0, 0.04], {
+    interpolate(frame, [268, 330], [0, 0.035], {
       extrapolateLeft: "clamp",
       extrapolateRight: "clamp",
       easing: easeInOut,
     });
 
-  // warm "office" wash fades to reveal the clean Stage world
-  const warm = interpolate(frame, [26, 108], [1, 0], {
+  // long, smooth warm -> cool background resolve, synced to the realign
+  const warm = interpolate(frame, [55, 205], [1, 0], {
+    extrapolateLeft: "clamp",
+    extrapolateRight: "clamp",
+    easing: easeInOut,
+  });
+  // cream -> white tile faces over the same window
+  const colorProgress = interpolate(frame, [60, 205], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: easeInOut,
   });
 
-  // laptop echo from the problem scene, fades early
-  const laptop = interpolate(frame, [0, 14, 54, 82], [0, 1, 1, 0], {
+  const laptop = interpolate(frame, [0, 16, 60, 96], [0, 1, 1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
   });
 
-  // tiles consolidate, then the layer clears as the window forms
-  const tilesOut = interpolate(frame, [120, 143], [1, 0], {
+  // organized grid consolidates into the Permute window
+  const sceneOut = interpolate(frame, [262, 306], [1, 0], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: easeInOut,
@@ -51,34 +55,40 @@ export const TransitionFilm: React.FC = () => {
 
   return (
     <Stage>
-      {/* warm office wash over the clean Stage bg */}
+      {/* warm "office" wash over the clean Stage bg */}
       <AbsoluteFill
         style={{
           opacity: warm,
           background:
-            "linear-gradient(180deg, #d8e9f8 0%, #eaf2fb 36%, #f4ead8 60%, #e4cfac 100%)",
+            "linear-gradient(180deg, #d8e9f8 0%, #eaf2fb 36%, #f4ead8 60%, #e6d2b0 100%)",
         }}
       />
 
-      {/* scene (tiles + laptop) under a single gentle camera */}
+      {/* the pile, under a single gentle camera */}
       <AbsoluteFill
         style={{
           transform: `scale(${camScale})`,
-          transformOrigin: "50% 46%",
-          opacity: tilesOut,
+          transformOrigin: "50% 48%",
+          opacity: sceneOut,
         }}
       >
-        <Laptop opacity={laptop} />
         {ORDERED.map((t) => (
-          <Tile key={t.id} t={t} />
+          <Tile key={t.id} t={t} colorProgress={colorProgress} />
         ))}
+        <Laptop opacity={laptop} />
       </AbsoluteFill>
 
-      {/* final state: the systems unify into the Permute window */}
+      {/* the systems unify into the Permute window (the demos' opening frame) */}
       <WindowReveal frame={frame} />
 
-      {/* persistent brand lockup matching the demo clips */}
-      <div style={{ opacity: interpolate(frame, [120, 144], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>
+      <div
+        style={{
+          opacity: interpolate(frame, [262, 300], [0, 1], {
+            extrapolateLeft: "clamp",
+            extrapolateRight: "clamp",
+          }),
+        }}
+      >
         <Watermark />
       </div>
     </Stage>
@@ -88,39 +98,43 @@ export const TransitionFilm: React.FC = () => {
 const Laptop: React.FC<{ opacity: number }> = ({ opacity }) => {
   if (opacity <= 0) return null;
   return (
-    <div style={{ opacity }}>
-      {/* closed silver laptop slab, echoing the reference */}
+    <div
+      style={{
+        position: "absolute",
+        left: "50%",
+        top: 760,
+        width: 780,
+        height: 320,
+        marginLeft: -390,
+        opacity,
+      }}
+    >
       <div
         style={{
           position: "absolute",
-          left: "50%",
-          top: 712,
-          width: 760,
-          height: 348,
-          marginLeft: -380,
+          inset: 0,
           borderRadius: 26,
           background:
-            "linear-gradient(170deg, #e3e7ee 0%, #c7cedb 48%, #aab2c2 100%)",
-          boxShadow: "0 40px 90px -30px rgba(20,40,90,0.45)",
+            "linear-gradient(170deg, #e6eaf0 0%, #c9d0dc 48%, #aab2c2 100%)",
+          boxShadow: "0 44px 100px -34px rgba(20,40,90,0.5)",
           border: "1px solid rgba(255,255,255,0.7)",
         }}
-      >
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            borderRadius: 26,
-            background:
-              "linear-gradient(110deg, rgba(255,255,255,0.5), rgba(255,255,255,0) 40%)",
-          }}
-        />
-      </div>
+      />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          borderRadius: 26,
+          background:
+            "linear-gradient(110deg, rgba(255,255,255,0.5), rgba(255,255,255,0) 42%)",
+        }}
+      />
     </div>
   );
 };
 
 const WindowReveal: React.FC<{ frame: number }> = ({ frame }) => {
-  const a = interpolate(frame, [124, 150], [0, 1], {
+  const a = interpolate(frame, [268, 326], [0, 1], {
     extrapolateLeft: "clamp",
     extrapolateRight: "clamp",
     easing: easeOut,
@@ -154,7 +168,7 @@ const WindowReveal: React.FC<{ frame: number }> = ({ frame }) => {
               One unified system
             </div>
             <LightSweep
-              progress={interpolate(frame, [138, 150], [0, 1], {
+              progress={interpolate(frame, [306, 326], [0, 1], {
                 extrapolateLeft: "clamp",
                 extrapolateRight: "clamp",
               })}
