@@ -10,11 +10,11 @@ import { easeOut, easeInOut, reveal } from "../anim";
 const W = 1420;
 const H = 854;
 
-// Highlight callouts over key planner sections (frame-space, inside the screen).
+// Highlight callouts over key planner sections — kept to two, surfacing only
+// after the pull-back settles so motions don't stack.
 const HILITES = [
-  { label: "Cash runway · 18+ mo", x: 0.86, y: 0.12, at: 30 },
-  { label: "Projected cash trend", x: 0.6, y: 0.34, at: 40 },
-  { label: "Net / month · $921", x: 0.2, y: 0.86, at: 50 },
+  { label: "Cash runway · 18+ mo", x: 0.84, y: 0.13, at: 54 },
+  { label: "Projected cash trend", x: 0.46, y: 0.3, at: 64 },
 ];
 
 export const DBeat4: React.FC<{ rich: boolean }> = ({ rich }) => {

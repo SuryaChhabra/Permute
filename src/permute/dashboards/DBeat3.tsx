@@ -5,21 +5,15 @@ import { Caption } from "../components/Caption";
 import { SoftRing } from "../components/Motion";
 import { easeOut, easeInOut, reveal } from "../anim";
 
-// Bulb anchor (screen coords); chips fan to the right.
-const BX = 660;
-const BY = 470;
-
-type Chip = { label: string; x: number; y: number; at: number };
-const CHIPS: Chip[] = [
-  { label: "Add cash runway trend", x: 1020, y: 360, at: 16 },
-  { label: "Compare burn vs revenue", x: 1080, y: 470, at: 24 },
-  { label: "Highlight overdue invoices", x: 1020, y: 580, at: 32 },
-  { label: "Add scenario planning", x: 880, y: 660, at: 40 },
+// The real Permute "Ideas" suggestions.
+const CHIPS = [
+  "Add weighted pipeline trend",
+  "Collection rate gauge",
+  "Export alert digest",
 ];
 
 export const DBeat3: React.FC<{ rich: boolean }> = ({ rich }) => {
   const frame = useCurrentFrame();
-  const chips = rich ? CHIPS : CHIPS.slice(0, 3);
 
   const enter = interpolate(frame, [0, 14], [0, 1], {
     extrapolateLeft: "clamp",
@@ -32,14 +26,7 @@ export const DBeat3: React.FC<{ rich: boolean }> = ({ rich }) => {
     easing: easeInOut,
   });
 
-  // bulb lights up
-  const light = reveal(frame, 6, 16);
-  // ideas flow back into the dashboard near the end
-  const flow = interpolate(frame, [56, 74], [0, 1], {
-    extrapolateLeft: "clamp",
-    extrapolateRight: "clamp",
-    easing: easeInOut,
-  });
+  const light = reveal(frame, 6, 14);
 
   return (
     <AbsoluteFill style={{ opacity: Math.min(enter, exit) }}>
@@ -57,7 +44,7 @@ export const DBeat3: React.FC<{ rich: boolean }> = ({ rich }) => {
           boxShadow: shadows.window,
           border: `1px solid ${colors.border}`,
           overflow: "hidden",
-          transform: `scale(${interpolate(frame, [0, 81], [1.02, 1.06], {
+          transform: `scale(${interpolate(frame, [0, 81], [1.02, 1.05], {
             extrapolateRight: "clamp",
           })})`,
         }}
@@ -68,104 +55,53 @@ export const DBeat3: React.FC<{ rich: boolean }> = ({ rich }) => {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            filter: "blur(7px) saturate(0.92)",
+            filter: "blur(8px) saturate(0.9)",
             transform: "scale(1.06)",
           }}
         />
-        <div
-          style={{
-            position: "absolute",
-            inset: 0,
-            background: "rgba(244,247,251,0.62)",
-          }}
-        />
+        <div style={{ position: "absolute", inset: 0, background: "rgba(244,247,251,0.66)" }} />
       </div>
 
-      {/* Option 2: connector lines from bulb to chips */}
-      {rich && (
-        <svg
-          width={1920}
-          height={1080}
-          style={{ position: "absolute", inset: 0, pointerEvents: "none" }}
-        >
-          {chips.map((c, i) => {
-            const d = interpolate(frame, [c.at, c.at + 12], [0, 1], {
-              extrapolateLeft: "clamp",
-              extrapolateRight: "clamp",
-              easing: easeOut,
-            });
-            const fx = c.x + (BX - c.x) * flow;
-            const fy = c.y + (BY - c.y) * flow;
-            return (
-              <line
-                key={i}
-                x1={BX}
-                y1={BY}
-                x2={BX + (fx - BX) * d}
-                y2={BY + (fy - BY) * d}
-                stroke={colors.blue}
-                strokeWidth={1.4}
-                opacity={0.34 * (1 - flow * 0.6)}
-              />
-            );
-          })}
-        </svg>
-      )}
-
-      {/* suggestion chips */}
-      {chips.map((c, i) => {
-        const a = reveal(frame, c.at, 12);
-        const fx = c.x + (BX - c.x) * flow;
-        const fy = c.y + (BY - c.y) * flow;
-        const fade = 1 - flow;
-        return (
-          <div
-            key={i}
-            style={{
-              position: "absolute",
-              left: fx,
-              top: fy,
-              transform: `translate(-50%, -50%) scale(${(0.9 + a * 0.1) * (1 - flow * 0.25)})`,
-              opacity: a * fade,
-              display: "flex",
-              alignItems: "center",
-              gap: 9,
-              padding: "11px 16px",
-              borderRadius: radii.pill,
-              background: "#fff",
-              border: `1px solid ${colors.blue}33`,
-              boxShadow: shadows.card,
-              fontFamily,
-              fontSize: 16,
-              fontWeight: 600,
-              color: colors.inkSoft,
-              whiteSpace: "nowrap",
-            }}
-          >
-            <span
-              style={{ width: 8, height: 8, borderRadius: "50%", background: colors.blue }}
-            />
-            {c.label}
-          </div>
-        );
-      })}
-
-      {/* the bulb */}
+      {/* Ideas panel — matches the real product UI */}
       <div
         style={{
           position: "absolute",
-          left: BX,
-          top: BY,
+          left: "50%",
+          top: "47%",
           transform: "translate(-50%, -50%)",
+          display: "flex",
+          flexDirection: "column",
+          gap: 16,
+          fontFamily,
         }}
       >
-        {rich && (
-          <>
-            <SoftRing size={150} opacity={0.18 * light} />
-            <SoftRing size={210} opacity={0.1 * light} />
-          </>
-        )}
-        <Bulb light={light} />
+        {/* row 1: bulb + Ideas label + first chip */}
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              opacity: reveal(frame, 4, 12),
+              transform: `translateY(${(1 - reveal(frame, 4, 12)) * 8}px)`,
+            }}
+          >
+            <div style={{ position: "relative", display: "flex" }}>
+              {rich && <SoftRing size={64} color={colors.idea} opacity={0.16 * light} />}
+              <IdeaBulb light={light} />
+            </div>
+            <span style={{ fontSize: 26, fontWeight: 600, color: colors.inkMuted }}>
+              Ideas
+            </span>
+          </div>
+          <IdeaChip label={CHIPS[0]} appear={reveal(frame, 18, 12)} />
+        </div>
+
+        {/* row 2: remaining chips */}
+        <div style={{ display: "flex", gap: 16, paddingLeft: 4 }}>
+          <IdeaChip label={CHIPS[1]} appear={reveal(frame, 28, 12)} />
+          <IdeaChip label={CHIPS[2]} appear={reveal(frame, 36, 12)} />
+        </div>
       </div>
 
       <Caption
@@ -178,44 +114,39 @@ export const DBeat3: React.FC<{ rich: boolean }> = ({ rich }) => {
   );
 };
 
-const Bulb: React.FC<{ light: number }> = ({ light }) => {
-  const id = React.useId();
-  return (
-    <svg width={120} height={120} viewBox="0 0 100 100" style={{ overflow: "visible" }}>
-      <defs>
-        <radialGradient id={`${id}-g`} cx="42%" cy="34%" r="70%">
-          <stop offset="0%" stopColor="#eaf1ff" />
-          <stop offset="45%" stopColor="#8fb0ff" />
-          <stop offset="100%" stopColor="#3a6df0" />
-        </radialGradient>
-        <radialGradient id={`${id}-glow`} cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stopColor="rgba(90,134,244,0.55)" />
-          <stop offset="100%" stopColor="rgba(90,134,244,0)" />
-        </radialGradient>
-      </defs>
-      <circle cx="50" cy="44" r="46" fill={`url(#${id}-glow)`} opacity={light} />
-      {/* glass */}
-      <circle
-        cx="50"
-        cy="42"
-        r="26"
-        fill={`url(#${id}-g)`}
-        opacity={0.35 + light * 0.65}
-      />
-      <ellipse cx="42" cy="34" rx="9" ry="6" fill="rgba(255,255,255,0.85)" opacity={light} />
-      {/* filament */}
-      <path
-        d="M44 44 Q50 36 56 44"
-        stroke="#fff"
-        strokeWidth="2"
-        fill="none"
-        strokeLinecap="round"
-        opacity={light}
-      />
-      {/* base */}
-      <rect x="42" y="64" width="16" height="7" rx="2" fill="#cdd6e4" />
-      <rect x="44" y="71" width="12" height="6" rx="2" fill="#aab6c8" />
-      <rect x="46" y="77" width="8" height="4" rx="2" fill="#8f9cb0" />
-    </svg>
-  );
-};
+const IdeaChip: React.FC<{ label: string; appear: number }> = ({
+  label,
+  appear,
+}) => (
+  <div
+    style={{
+      padding: "14px 24px",
+      borderRadius: radii.pill,
+      background: "#eceef2",
+      border: `1px solid ${colors.border}`,
+      fontSize: 21,
+      fontWeight: 600,
+      color: colors.inkSoft,
+      whiteSpace: "nowrap",
+      opacity: appear,
+      transform: `translateY(${(1 - appear) * 12}px)`,
+      boxShadow: "0 6px 18px -10px rgba(20,40,90,0.18)",
+    }}
+  >
+    {label}
+  </div>
+);
+
+// Thin purple outline bulb, matching the product's Ideas glyph.
+const IdeaBulb: React.FC<{ light: number }> = ({ light }) => (
+  <svg width={34} height={34} viewBox="0 0 24 24" fill="none" style={{ overflow: "visible" }}>
+    <path
+      d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.5.4.9 1 .9 1.6v.5h5.2v-.5c0-.6.4-1.2.9-1.6A6 6 0 0 0 12 3z"
+      stroke={colors.idea}
+      strokeWidth={1.7}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      opacity={0.5 + light * 0.5}
+    />
+  </svg>
+);

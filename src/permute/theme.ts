@@ -46,6 +46,9 @@ export const colors = {
   orangeSoft: "#ed7d3a",
   orangeDeep: "#b8551a",
   orangeTint: "#fdf0e7",
+
+  // Indigo — the product "Ideas" glyph accent
+  idea: "#6d5ae6",
 } as const;
 
 export const shadows = {

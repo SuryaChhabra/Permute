@@ -1,8 +1,7 @@
 import React from "react";
 import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
-import { colors } from "../theme";
 import { Caption } from "../components/Caption";
-import { LightSweep, SoftRing, FloatingChip } from "../components/Motion";
+import { LightSweep } from "../components/Motion";
 import { DemoScreen } from "./DemoScreen";
 import { easeOut, easeInOut, reveal } from "../anim";
 
@@ -45,34 +44,6 @@ export const DBeat1: React.FC<{ rich: boolean }> = ({ rich }) => {
           />
         )}
       </DemoScreen>
-
-      {/* Option 2: a couple of quiet supporting accents in negative space */}
-      {rich && (
-        <>
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-640px, -360px)",
-            }}
-          >
-            <SoftRing size={140} opacity={0.1} />
-          </div>
-          <FloatingChip
-            label="Revenue"
-            appear={reveal(frame, 22, 12)}
-            tint={colors.blue}
-            style={{ left: "calc(50% + 560px)", top: "calc(50% - 300px)" }}
-          />
-          <FloatingChip
-            label="Pipeline"
-            appear={reveal(frame, 30, 12)}
-            tint={colors.green}
-            style={{ left: "calc(50% + 560px)", top: "calc(50% - 250px)" }}
-          />
-        </>
-      )}
 
       <Caption lines={["Dashboards."]} enter={6} exitStart={50} size={70} />
     </AbsoluteFill>

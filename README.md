@@ -22,9 +22,10 @@ chips, light sweeps).
 - **Reports** (`reports/ReportsFilm.tsx`): Reports running → Weekly schedule →
   Pipeline alerts → Packaged & sent.
 - **Dashboards** (`dashboards/DashboardsFilm.tsx`): built **around the real
-  Permute demo footage** in `public/dash/` (Business Overview, Add Connector,
-  Cash Runway Planner) embedded via `OffthreadVideo` and enhanced with on-screen
-  text, highlights, and motion. Beats: Dashboards → Ask / theme → Get ideas
+  Permute demo footage** in `public/dash/` (Business Overview, Pick-a-theme
+  modal, Cash Runway Planner) embedded via `OffthreadVideo` and enhanced with
+  on-screen text, highlights, and motion. The Ideas beat matches the product's
+  real suggestions UI. Beats: Dashboards → Ask / choose a theme → Get ideas
   (bulb) → Permute builds the full system → No code needed.
 
 ## The Tables sequence
