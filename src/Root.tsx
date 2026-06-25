@@ -6,6 +6,10 @@ import {
   DashboardsFilm,
   DASHBOARDS_DURATION,
 } from "./permute/dashboards/DashboardsFilm";
+import {
+  TransitionFilm,
+  TRANSITION_DURATION,
+} from "./permute/transition/TransitionFilm";
 
 // Permute B2B SaaS film series.
 //   PermuteBrandFilm          — Tables (15s)
@@ -57,6 +61,14 @@ export const RemotionRoot: React.FC = () => {
         width={1920}
         height={1080}
         defaultProps={{ rich: true }}
+      />
+      <Composition
+        id="PermuteTransition"
+        component={TransitionFilm}
+        durationInFrames={TRANSITION_DURATION}
+        fps={30}
+        width={1920}
+        height={1080}
       />
     </>
   );

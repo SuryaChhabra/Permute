@@ -13,6 +13,7 @@ rendered as vector React components so zoom-ins / push-ins stay crisp.
 | `PermuteReportsOption2` | Reports | 12s | richer (matches Tables Option 2) |
 | `PermuteDashboardsOption1` | Dashboards | 12s | restrained (matches Tables Option 1) |
 | `PermuteDashboardsOption2` | Dashboards | 12s | richer (matches Tables Option 2) |
+| `PermuteTransition` | Problem → solution bridge | 5s | reorganizing tile motion |
 
 Each section's two options share one component driven by a single `rich` flag —
 Option 2 adds the same motion-design layer as Tables Option 2 (cross-cut
@@ -27,6 +28,12 @@ chips, light sweeps).
   on-screen text, highlights, and motion. The Ideas beat matches the product's
   real suggestions UI. Beats: Dashboards → Ask / choose a theme → Get ideas
   (bulb) → Permute builds the full system → No code needed.
+- **Transition** (`transition/TransitionFilm.tsx`): a 5s bridge from the opening
+  problem scene into the feature demos. A messy pile of disconnected
+  business-system tiles reorganizes into a clean structured grid as the
+  background resolves to the Stage look, then consolidates into the Permute app
+  window — the exact frame the demos open on. Tile layout is deterministic
+  (seeded) so renders are stable.
 
 ## The Tables sequence
 
