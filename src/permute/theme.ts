@@ -40,6 +40,12 @@ export const colors = {
   greenTint: "#e7f6ef",
   amber: "#d99a23",
   amberTint: "#fbf3df",
+
+  // Soft orange — pipeline alerts & HubSpot source chips only
+  orange: "#e0742a",
+  orangeSoft: "#ed7d3a",
+  orangeDeep: "#b8551a",
+  orangeTint: "#fdf0e7",
 } as const;
 
 export const shadows = {

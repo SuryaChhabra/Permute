@@ -1,9 +1,12 @@
 import "./index.css";
 import { Composition } from "remotion";
 import { BrandFilm, DURATION } from "./permute/BrandFilm";
+import { ReportsFilm, REPORTS_DURATION } from "./permute/reports/ReportsFilm";
 
-// Permute — 15-second B2B SaaS brand film.
-// Render with: npx remotion render PermuteBrandFilm out/permute.mp4
+// Permute B2B SaaS film series.
+//   PermuteBrandFilm        — Tables (15s)
+//   PermuteReportsOption1   — Reports, restrained  (12s)
+//   PermuteReportsOption2   — Reports, richer motion (12s)
 export const RemotionRoot: React.FC = () => {
   return (
     <>
@@ -14,6 +17,24 @@ export const RemotionRoot: React.FC = () => {
         fps={30}
         width={1920}
         height={1080}
+      />
+      <Composition
+        id="PermuteReportsOption1"
+        component={ReportsFilm}
+        durationInFrames={REPORTS_DURATION}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ rich: false }}
+      />
+      <Composition
+        id="PermuteReportsOption2"
+        component={ReportsFilm}
+        durationInFrames={REPORTS_DURATION}
+        fps={30}
+        width={1920}
+        height={1080}
+        defaultProps={{ rich: true }}
       />
     </>
   );

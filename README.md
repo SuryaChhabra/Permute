@@ -1,10 +1,24 @@
-# Permute — Brand Film
+# Permute — Film Series
 
-A polished 15-second B2B SaaS brand-film sequence for **Permute**, built with
+Polished B2B SaaS product films for **Permute**, built with
 [Remotion](https://remotion.dev). Everything (UI, tables, motion graphics) is
 rendered as vector React components so zoom-ins / push-ins stay crisp.
 
-## The sequence
+## Compositions
+
+| id | Section | Length | Motion |
+| --- | --- | --- | --- |
+| `PermuteBrandFilm` | Tables | 15s | richer (Option 2 style) |
+| `PermuteReportsOption1` | Reports | 12s | restrained (matches Tables Option 1) |
+| `PermuteReportsOption2` | Reports | 12s | richer (matches Tables Option 2) |
+
+The two Reports options share one component (`reports/ReportsFilm.tsx`); a single
+`rich` flag is the only difference — Option 2 adds the same motion-design layer
+as Tables Option 2 (cross-cut connector/ring transitions, confirmation pulses,
+connector trails, floating chips, light sweeps). Reports beats: Reports running →
+Weekly schedule → Pipeline alerts → Packaged & sent.
+
+## The Tables sequence
 
 | Time        | On-screen text                       | Beat                                                            |
 | ----------- | ------------------------------------ | --------------------------------------------------------------- |
